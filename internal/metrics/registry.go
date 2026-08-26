@@ -52,8 +52,8 @@ func (r *Registry) Shard(i int) *Shard {
 }
 
 func (r *Registry) Tick() {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
+	r.mu.Lock()
+	defer r.mu.Unlock()
 	now := clock.Now()
 	dt := now.Sub(r.prevAt).Seconds()
 	if dt <= 0 {
@@ -67,6 +67,11 @@ func (r *Registry) Tick() {
 		outF += s.OutFrames.Load()
 		errN += s.Errors.Load()
 	}
+	// All derived rates and the previous-period baselines are mutated here;
+	// they are read by Overview() under an RLock. Mutating plain float64/uint64
+	// fields under an RLock would race with those readers, so Tick must hold
+	// the write lock so that observers always see a snapshot from a single,
+	// consistent collection period.
 	r.inBps = float64(inB-r.prevInB) * 8 / dt
 	r.outBps = float64(outB-r.prevOutB) * 8 / dt
 	r.inPPS = float64(inF-r.prevInF) / dt
