@@ -1,0 +1,104 @@
+services:
+  gateway:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.gateway
+    environment:
+      - TZ=Asia/Shanghai
+      - MINIENVY_CONFIG=/etc/minienvoy/demo.yaml
+      - MINIENVY_LOG_LEVEL=info
+      - MINIENVY_ADMIN_TOKEN=demo-minienvoy-token
+    volumes:
+      - ./configs/demo.yaml:/etc/minienvoy/demo.yaml:ro
+    ports:
+      - "31880:9000"
+    expose:
+      - "8080"
+      - "9000"
+    depends_on:
+      upstream-a:
+        condition: service_started
+      upstream-b:
+        condition: service_started
+      upstream-c:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/minienvoy", "healthcheck"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 15s
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
+  upstream-a:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.upstream
+    environment:
+      - TZ=Asia/Shanghai
+      - MENV_LISTEN=:9001
+      - MENV_ID=upstream-a
+      - MENV_MODE=echo
+    expose:
+      - "9001"
+    restart: unless-stopped
+
+  upstream-b:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.upstream
+    environment:
+      - TZ=Asia/Shanghai
+      - MENV_LISTEN=:9002
+      - MENV_ID=upstream-b
+      - MENV_MODE=echo
+    expose:
+      - "9002"
+    restart: unless-stopped
+
+  upstream-c:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.upstream
+    environment:
+      - TZ=Asia/Shanghai
+      - MENV_LISTEN=:9003
+      - MENV_ID=upstream-c
+      - MENV_MODE=flaky
+      - MENV_FAIL_EVERY=8
+    expose:
+      - "9003"
+    restart: unless-stopped
+
+  loadgen:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.ctl
+    environment:
+      - TZ=Asia/Shanghai
+    command: ["load", "--target", "gateway:9000", "--route", "1", "--rps", "20", "--size", "256"]
+    depends_on:
+      gateway:
+        condition: service_healthy
+    restart: unless-stopped
+
+  console:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.console
+    environment:
+      - TZ=Asia/Shanghai
+    ports:
+      - "31881:80"
+    depends_on:
+      gateway:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
