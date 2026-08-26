@@ -392,9 +392,6 @@ func (r *Reactor) onUp(c *Conn, hdr protocol.Header) {
 		c.Parser.ConsumePayload(c.Ring)
 		return
 	}
-	if c.EP != nil {
-		c.EP.RecordSuccess(r.passN)
-	}
 	if hdr.Opcode == protocol.OpERROR {
 		if c.EP != nil {
 			c.EP.RecordFail(r.failN)
@@ -402,6 +399,8 @@ func (r *Reactor) onUp(c *Conn, hdr protocol.Header) {
 		if r.shard != nil {
 			r.shard.Errors.Add(1)
 		}
+	} else if c.EP != nil {
+		c.EP.RecordSuccess(r.passN)
 	}
 	protocol.EncodeHeader(&hdr, down.Hdr[:])
 	a, b := c.Parser.PeekPayload(c.Ring)
