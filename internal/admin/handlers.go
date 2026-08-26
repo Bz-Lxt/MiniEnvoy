@@ -1,7 +1,6 @@
 package admin
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
 	"strings"
@@ -40,7 +39,7 @@ func (a *API) auth(next http.HandlerFunc) http.HandlerFunc {
 			writeError(w, http.StatusUnauthorized, "unauthorized", "missing or invalid admin token", nil)
 			return
 		}
-		next(w, r.Clone(context.Background()))
+		next(w, r)
 	}
 }
 
