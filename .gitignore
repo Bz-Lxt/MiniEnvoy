@@ -1,0 +1,47 @@
+# Binaries
+/bin/
+/dist/
+*.exe
+*.test
+*.out
+coverage.out
+coverage.html
+
+# Dependencies & build
+node_modules/
+vendor/
+web/dist/
+web/node_modules/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+tmp/
+.cache/
+
+# Logs
+*.log
+logs/
+
+# Test artifacts
+bench/results/*.json
+bench/results/*.txt
+!bench/results/.gitkeep
+/docs/
+/.alkaid-sop
+/CLAUDE.md
+/AGENTS.md
+/.cursorrules
+/.github/
+/BUG_REPRO.md
+/BUG_INJECT.md
+/defects.md

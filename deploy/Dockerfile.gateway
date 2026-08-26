@@ -1,0 +1,19 @@
+FROM golang:1.25-alpine AS build
+WORKDIR /src
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
+ENV GOPROXY=https://goproxy.cn,direct \
+    CGO_ENABLED=0 \
+    GOTOOLCHAIN=local
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN go build -mod=readonly -trimpath -o /out/minienvoy ./cmd/minienvoy
+
+FROM alpine:3.21
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
+    && apk add --no-cache ca-certificates tzdata
+ENV TZ=Asia/Shanghai
+COPY --from=build /out/minienvoy /usr/local/bin/minienvoy
+USER nobody
+EXPOSE 8080 9000
+ENTRYPOINT ["/usr/local/bin/minienvoy"]
