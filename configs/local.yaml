@@ -1,0 +1,24 @@
+version: 1
+log_level: debug
+reactors: 1
+listen:
+  ip: 127.0.0.1
+  port: 31880
+  backlog: 128
+admin:
+  bind: 127.0.0.1:18080
+buffer:
+  chunk_size: 65536
+  high_water: 49152
+  low_water: 16384
+  max_payload: 1048576
+routes:
+  - id: 1
+    name: echo
+    algorithm: rr
+    upstreams: [local-a]
+upstreams:
+  - id: local-a
+    host: 127.0.0.1
+    port: 19001
+    weight: 1
