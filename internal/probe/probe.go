@@ -15,7 +15,7 @@ type Config struct {
 	PassThreshold uint64
 }
 
-func Ping(ep *upstream.Endpoint, cfg Config) error {
+func Ping(ep *upstream.Endpoint, cfg Config) (pingErr error) {
 	addr := fmt.Sprintf("%d.%d.%d.%d:%d", ep.IP[0], ep.IP[1], ep.IP[2], ep.IP[3], ep.Port)
 	d := net.Dialer{Timeout: cfg.Timeout}
 	conn, err := d.Dial("tcp", addr)
@@ -25,7 +25,7 @@ func Ping(ep *upstream.Endpoint, cfg Config) error {
 	}
 	defer conn.Close()
 	defer func() {
-		if err != nil {
+		if pingErr != nil {
 			ep.RecordFail(cfg.FailThreshold)
 			return
 		}
