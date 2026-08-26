@@ -14,6 +14,9 @@ func NewRegistry(eps []*Endpoint) *Registry {
 	return r
 }
 
+// Get returns the endpoint by id only if it is currently eligible for
+// routing (Healthy, Degraded, or Probing). This is the data-plane
+// lookup used by the router.
 func (r *Registry) Get(id string) *Endpoint {
 	if r == nil {
 		return nil
@@ -23,6 +26,16 @@ func (r *Registry) Get(id string) *Endpoint {
 		return nil
 	}
 	return ep
+}
+
+// Lookup returns the endpoint by id regardless of its current state.
+// This is the control-plane lookup used by admin operations (eject /
+// restore) that need to operate on ejected or down endpoints.
+func (r *Registry) Lookup(id string) *Endpoint {
+	if r == nil {
+		return nil
+	}
+	return r.byID[id]
 }
 
 func (r *Registry) All() []*Endpoint {
