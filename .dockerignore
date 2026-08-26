@@ -1,0 +1,15 @@
+.git
+.alkaid-sop
+node_modules
+web/node_modules
+web/dist
+bin
+dist
+tmp
+*.log
+.DS_Store
+.idea
+.vscode
+bench/results
+coverage.out
+**/.env
