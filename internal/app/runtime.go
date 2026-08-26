@@ -196,7 +196,7 @@ func (rt *Runtime) Topology() metrics.Topology {
 }
 
 func (rt *Runtime) Eject(id, reason string) error {
-	ep := rt.Ups.Get(id)
+	ep := rt.Ups.Lookup(id)
 	if ep == nil {
 		return fmt.Errorf("upstream not found")
 	}
@@ -208,7 +208,7 @@ func (rt *Runtime) Eject(id, reason string) error {
 }
 
 func (rt *Runtime) Restore(id string) error {
-	ep := rt.Ups.Get(id)
+	ep := rt.Ups.Lookup(id)
 	if ep == nil {
 		return fmt.Errorf("upstream not found")
 	}
