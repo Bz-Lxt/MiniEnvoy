@@ -31,7 +31,7 @@ func (s *Slab) Get() ([]byte, int) {
 	defer s.mu.Unlock()
 	if n := len(s.free); n > 0 {
 		idx := s.free[n-1]
-		s.free = s.free[n-1:]
+		s.free = s.free[:n-1]
 		return s.chunks[idx], idx
 	}
 	idx := len(s.chunks)
