@@ -1,0 +1,45 @@
+version: 1
+log_level: info
+reactors: 2
+listen:
+  ip: 0.0.0.0
+  port: 9000
+  backlog: 1024
+admin:
+  bind: 0.0.0.0:8080
+buffer:
+  chunk_size: 65536
+  high_water: 49152
+  low_water: 16384
+  max_payload: 1048576
+timeouts:
+  idle_ms: 60000
+  upstream_ms: 5000
+  drain_ms: 3000
+health:
+  interval_ms: 2000
+  timeout_ms: 800
+  fail_threshold: 3
+  pass_threshold: 2
+routes:
+  - id: 1
+    name: echo
+    algorithm: rr
+    upstreams: [upstream-a, upstream-b, upstream-c]
+  - id: 2
+    name: weighted-echo
+    algorithm: swrr
+    upstreams: [upstream-a, upstream-b]
+upstreams:
+  - id: upstream-a
+    host: upstream-a
+    port: 9001
+    weight: 3
+  - id: upstream-b
+    host: upstream-b
+    port: 9002
+    weight: 2
+  - id: upstream-c
+    host: upstream-c
+    port: 9003
+    weight: 1
