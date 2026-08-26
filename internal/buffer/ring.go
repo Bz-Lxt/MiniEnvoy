@@ -26,9 +26,10 @@ func AttachRing(s *Slab) *Ring {
 
 func (r *Ring) Release() {
 	if r.slab != nil && r.slot >= 0 {
-		defer func() { r.slab.Put(r.slot) }()
+		slot := r.slot
 		r.slot = -1
 		r.buf = nil
+		r.slab.Put(slot)
 	}
 }
 
